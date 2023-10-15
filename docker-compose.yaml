@@ -1,0 +1,40 @@
+version: '3' # Версия синтаксиса Docker Compose.
+
+services:
+
+  api: # Контейнер для API.
+    restart: always # Всегда перезапускать контейнер при завершении.
+    build: ./api # Собрать контейнер из Docker-файла в подпапке ./api.
+    ports:
+    - 5555:5000 # Сопоставить порт 5555 на хосте с портом 5000 внутри контейнера.
+    depends_on: # Не запускать контейнер, пока не будет запущены другие контейнеры, указанные в этом блоке.
+    - mysql 
+
+  frontend: # Контейнер для фронтенда.
+    restart: always # Всегда перезапускать контейнер при завершении.
+    build: ./frontend # Собрать контейнер из Docker-файла в подпапке ./frontend.
+    ports:
+    - 8954:8954 # Сопоставить порт 8954 на хосте с портом 8954 внутри контейнера.
+
+  mysql: # Контейнер MySQL.
+    restart: always # Всегда перезапускать контейнер при завершении.
+    image: mysql # Использовать образ MySQL из Docker Hub.
+    environment:
+    - MYSQL_ROOT_PASSWORD=password # Установить пароль для root пользователя MySQL.
+    - MYSQL_DATABASE=time_db # Создать базу данных с именем time_db.
+    volumes:
+    - mysql_data:/var/lib/mysql # Создать именованный том для хранения данных MySQL.
+
+  adminer: # Контейнер Adminer.
+    restart: always # Всегда перезапускать контейнер при завершении.
+    image: adminer # Использовать образ Adminer из Docker Hub.
+    environment:
+      - ADMINER_PLUGINS=tables-filter tinymce
+      - ADMINER_DESIGN=arcs-material
+    ports:
+    - 8888:8888 # Сопоставить порт 8888 на хосте с портом 8888 внутри контейнера.
+    depends_on: # Не запускать контейнер, пока не будет запущены другие контейнеры, указанные в этом блоке.
+    - mysql
+
+volumes:
+  mysql_data: # Именованный том для хранения данных MySQL.
